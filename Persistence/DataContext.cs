@@ -4,8 +4,12 @@ using System;
 
 namespace Persistence
 {
-    public class DataContext :DbContext
+     public class DataContext :DbContext
     {
+        /// <summary>
+        /// data context constructor
+        /// </summary>
+        /// <param name="options"></param>
         public DataContext(DbContextOptions options):base(options)
         {
 
