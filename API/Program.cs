@@ -1,20 +1,22 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using Persistence;
-
-namespace API
+﻿namespace API
 {
+    using Microsoft.AspNetCore;
+    using Microsoft.AspNetCore.Hosting;
+    using Microsoft.EntityFrameworkCore;
+    using Microsoft.Extensions.DependencyInjection;
+    using Microsoft.Extensions.Logging;
+    using Persistence;
+    using System;
+
+    /// <summary>
+    /// Defines the <see cref="Program" />
+    /// </summary>
     public class Program
     {
+        /// <summary>
+        /// The Main
+        /// </summary>
+        /// <param name="args">The args<see cref="string[]"/></param>
         public static void Main(string[] args)
         {
             var host = CreateWebHostBuilder(args).Build();
@@ -26,6 +28,7 @@ namespace API
                 {
                     var context = services.GetRequiredService<DataContext>();
                     context.Database.Migrate();
+                    Seed.seedData(context);
                 }
                 catch (Exception ex)
                 {
@@ -37,6 +40,11 @@ namespace API
             host.Run();
         }
 
+        /// <summary>
+        /// The CreateWebHostBuilder
+        /// </summary>
+        /// <param name="args">The args<see cref="string[]"/></param>
+        /// <returns>The <see cref="IWebHostBuilder"/></returns>
         public static IWebHostBuilder CreateWebHostBuilder(string[] args) =>
             WebHost.CreateDefaultBuilder(args)
                 .UseStartup<Startup>();
