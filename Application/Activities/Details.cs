@@ -1,5 +1,6 @@
 ﻿namespace Application.Activities
 {
+    using Application.Errors;
     using Domain;
     using MediatR;
     using Persistence;
@@ -50,9 +51,13 @@
             /// <returns>The <see cref="Task{Activity}"/></returns>
             public async Task<Activity> Handle(Query request, CancellationToken cancellationToken)
             {
-                var acitivity = await _context.Activities.FindAsync(request.Id);
-
-                return acitivity;
+               
+                var activity = await _context.Activities.FindAsync(request.Id);
+                if (activity == null)
+                {
+                    throw new RestException(System.Net.HttpStatusCode.NotFound, new { activity = "Not found" });
+                }
+                return activity;
             }
         }
     }

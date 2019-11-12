@@ -6,7 +6,7 @@
     /// <summary>
     /// Defines the <see cref="InitialCreate" />
     /// </summary>
-    public partial class InitialCreate : Migration
+    internal partial class InitialCreate : Migration
     {
         /// <summary>
         /// The Up

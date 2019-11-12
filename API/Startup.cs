@@ -1,6 +1,8 @@
 ﻿namespace API
 {
+    using API.Middelware;
     using Application.Activities;
+    using FluentValidation.AspNetCore;
     using MediatR;
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Hosting;
@@ -47,7 +49,9 @@
                  });
             });
             services.AddMediatR(typeof(List.Handler).Assembly);
-            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
+            services.AddMvc()
+                .AddFluentValidation(cfg => cfg.RegisterValidatorsFromAssemblyContaining<Create>())
+                .SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
         }
 
         /// <summary>
@@ -57,9 +61,10 @@
         /// <param name="env">The env<see cref="IHostingEnvironment"/></param>
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
+            app.UseMiddleware<ErrorHandlingMiddleware>();
             if (env.IsDevelopment())
             {
-                app.UseDeveloperExceptionPage();
+               // app.UseDeveloperExceptionPage();
             }
             else
             {
