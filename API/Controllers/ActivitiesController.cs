@@ -3,6 +3,7 @@
     using Application.Activities;
     using Domain;
     using MediatR;
+    using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
     using System;
     using System.Collections.Generic;
@@ -12,23 +13,10 @@
     /// <summary>
     /// Defines the <see cref="ActivitiesController" />
     /// </summary>
-    [Route("api/[controller]")]
-    [ApiController]
-    public class ActivitiesController : ControllerBase
-    {
-        /// <summary>
-        /// Defines the _mediator
-        /// </summary>
-        private readonly IMediator _mediator;
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ActivitiesController"/> class.
-        /// </summary>
-        /// <param name="mediator">The mediator<see cref="IMediator"/></param>
-        public ActivitiesController(IMediator mediator)
-        {
-            this._mediator = mediator;
-        }
+    public class ActivitiesController : BaseController
+    {
+       
 
         /// <summary>
         /// The List
@@ -38,7 +26,7 @@
         [HttpGet]
         public async Task<ActionResult<List<Activity>>> List(CancellationToken ct)
         {
-            return await _mediator.Send(new List.Query(), ct);
+            return await Mediator.Send(new List.Query(), ct);
         }
 
         /// <summary>
@@ -47,9 +35,10 @@
         /// <param name="id">The id<see cref="Guid"/></param>
         /// <returns>The <see cref="Task{ActionResult{Activity}}"/></returns>
         [HttpGet("{id}")]
+        [Authorize]
         public async Task<ActionResult<Activity>> Details(Guid id)
         {
-            return await _mediator.Send(new Details.Query { Id = id });
+            return await Mediator.Send(new Details.Query { Id = id });
         }
 
         /// <summary>
@@ -60,7 +49,7 @@
         [HttpPost]
         public async Task<ActionResult<Unit>> Create(Create.Command command)
         {
-            return await _mediator.Send(command);
+            return await Mediator.Send(command);
         }
 
         /// <summary>
@@ -73,7 +62,7 @@
         public async Task<ActionResult<Unit>> Edit(Guid id, Edit.Command command)
         {
             command.Id = id;
-            return await _mediator.Send(command);
+            return await Mediator.Send(command);
         }
 
         /// <summary>
@@ -84,7 +73,7 @@
         [HttpDelete("{id}")]
         public async Task<ActionResult<Unit>> Delete(Guid id)
         {
-            return await _mediator.Send(new Delete.Command { Id = id });
+            return await Mediator.Send(new Delete.Command { Id = id });
         }
     }
 }

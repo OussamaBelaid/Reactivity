@@ -2,14 +2,21 @@
 {
     using API.Middelware;
     using Application.Activities;
+    using Application.Interfaces;
     using FluentValidation.AspNetCore;
+    using Infrastructure.Security;
     using MediatR;
+    using Microsoft.AspNetCore.Authentication.JwtBearer;
+    using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Hosting;
+    using Microsoft.AspNetCore.Identity;
     using Microsoft.AspNetCore.Mvc;
+    using Microsoft.AspNetCore.Mvc.Authorization;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
+    using Microsoft.IdentityModel.Tokens;
     using Persistence;
 
     /// <summary>
@@ -41,6 +48,8 @@
             {
                 opt.UseSqlite(Configuration.GetConnectionString("DefaultConnection"));
             });
+
+
             services.AddCors(opt =>
             {
                 opt.AddPolicy("corsPolicy", policy =>
@@ -48,10 +57,42 @@
                      policy.AllowAnyHeader().AllowAnyMethod().WithOrigins("http://localhost:3000");
                  });
             });
+
+
             services.AddMediatR(typeof(List.Handler).Assembly);
-            services.AddMvc()
+
+            services.AddMvc(opt =>
+            {
+                var policy = new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build();
+                opt.Filters.Add(new AuthorizeFilter(policy));
+            })
                 .AddFluentValidation(cfg => cfg.RegisterValidatorsFromAssemblyContaining<Create>())
                 .SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
+
+            var builder = services.AddIdentityCore<Domain.AppUser>(); 
+            var identityBuilder = new IdentityBuilder(builder.UserType, builder.Services);
+
+            identityBuilder.AddEntityFrameworkStores<DataContext>();
+            identityBuilder.AddSignInManager<SignInManager<Domain.AppUser>>();
+            var key = new SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(Configuration["TokenKey"]));
+
+
+            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(opt =>
+            {
+                opt.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
+                {
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = key,
+                    ValidateAudience = false,
+                    ValidateIssuer = false
+                };
+            });
+
+            services.AddScoped<IJwtGenerator, JwtGenerator>();
+
+            services.AddScoped<IUserAccessor, UserAccessor>();
+
+           
         }
 
         /// <summary>
@@ -73,6 +114,7 @@
             }
 
             // app.UseHttpsRedirection();
+            app.UseAuthentication();
             app.UseCors("corsPolicy");
             app.UseMvc();
         }
