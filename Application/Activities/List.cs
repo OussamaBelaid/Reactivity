@@ -1,5 +1,7 @@
 ﻿namespace Application.Activities
 {
+    using Application.DTO;
+    using AutoMapper;
     using Domain;
     using MediatR;
     using Microsoft.EntityFrameworkCore;
@@ -17,34 +19,32 @@
         /// <summary>
         /// Defines the <see cref="Query" />
         /// </summary>
-        public class Query : IRequest<List<Activity>>
+        public class Query : IRequest<List<ActivityDto>>
         {
         }
 
         /// <summary>
         /// Defines the <see cref="Handler" />
         /// </summary>
-        public class Handler : IRequestHandler<Query, List<Activity>>
+        public class Handler : IRequestHandler<Query, List<ActivityDto>>
         {
             /// <summary>
             /// Defines the _context
             /// </summary>
             private readonly DataContext _context;
+            private readonly IMapper _mapper;
 
-            /// <summary>
-            /// Defines the _logger
-            /// </summary>
-            private readonly ILogger<List> _logger;
+
 
             /// <summary>
             /// Initializes a new instance of the <see cref="Handler"/> class.
             /// </summary>
             /// <param name="context">The context<see cref="DataContext"/></param>
             /// <param name="logger">The logger<see cref="ILogger{List}"/></param>
-            public Handler(DataContext context, ILogger<List> logger)
+            public Handler(DataContext context,IMapper mapper)
             {
-                this._context = context;
-                this._logger = logger;
+               _context = context;
+                _mapper = mapper;
             }
 
             /// <summary>
@@ -53,8 +53,9 @@
             /// <param name="request">The request<see cref="Query"/></param>
             /// <param name="cancellationToken">The cancellationToken<see cref="CancellationToken"/></param>
             /// <returns>The <see cref="Task{List{Activity}}"/></returns>
-            public async Task<List<Activity>> Handle(Query request, CancellationToken cancellationToken)
+            public async Task<List<ActivityDto>> Handle(Query request, CancellationToken cancellationToken)
             {
+              
                 //try
                 //{
                 //    for (var i=0;i<10;i++)
@@ -71,7 +72,8 @@
                 //    _logger.LogInformation("Task was canceled");
                 //}
                 var activities = await _context.Activities.ToListAsync(cancellationToken);
-                return activities;
+                var activitiesResult = _mapper.Map<List<Activity>, List<ActivityDto>>(activities);
+                return activitiesResult;
             }
         }
     }

@@ -1,8 +1,11 @@
 ﻿namespace Application.Activities
 {
+    using Application.DTO;
     using Application.Errors;
+    using AutoMapper;
     using Domain;
     using MediatR;
+    using Microsoft.EntityFrameworkCore;
     using Persistence;
     using System;
     using System.Threading;
@@ -16,7 +19,7 @@
         /// <summary>
         /// Defines the <see cref="Query" />
         /// </summary>
-        public class Query : IRequest<Activity>
+        public class Query : IRequest<ActivityDto>
         {
             /// <summary>
             /// Gets or sets the Id
@@ -27,20 +30,22 @@
         /// <summary>
         /// Defines the <see cref="Handler" />
         /// </summary>
-        public class Handler : IRequestHandler<Query, Activity>
+        public class Handler : IRequestHandler<Query, ActivityDto>
         {
             /// <summary>
             /// Defines the _context
             /// </summary>
             private readonly DataContext _context;
+            private readonly IMapper _mapper;
 
             /// <summary>
             /// Initializes a new instance of the <see cref="Handler"/> class.
             /// </summary>
             /// <param name="context">The context<see cref="DataContext"/></param>
-            public Handler(DataContext context)
+            public Handler(DataContext context,IMapper mapper)
             {
-                this._context = context;
+                _context = context;
+               _mapper = mapper;
             }
 
             /// <summary>
@@ -49,7 +54,7 @@
             /// <param name="request">The request<see cref="Query"/></param>
             /// <param name="cancellationToken">The cancellationToken<see cref="CancellationToken"/></param>
             /// <returns>The <see cref="Task{Activity}"/></returns>
-            public async Task<Activity> Handle(Query request, CancellationToken cancellationToken)
+            public async Task<ActivityDto> Handle(Query request, CancellationToken cancellationToken)
             {
                
                 var activity = await _context.Activities.FindAsync(request.Id);
@@ -57,8 +62,11 @@
                 {
                     throw new RestException(System.Net.HttpStatusCode.NotFound, new { activity = "Not found" });
                 }
-                return activity;
+                var activityReturns = _mapper.Map<Activity, ActivityDto>(activity);
+                return activityReturns;
             }
+
+           
         }
     }
 }

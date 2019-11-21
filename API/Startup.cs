@@ -3,6 +3,7 @@
     using API.Middelware;
     using Application.Activities;
     using Application.Interfaces;
+    using AutoMapper;
     using FluentValidation.AspNetCore;
     using Infrastructure.Security;
     using MediatR;
@@ -46,6 +47,7 @@
         {
             services.AddDbContext<DataContext>(opt =>
             {
+                opt.UseLazyLoadingProxies();
                 opt.UseSqlite(Configuration.GetConnectionString("DefaultConnection"));
             });
 
@@ -61,6 +63,8 @@
 
             services.AddMediatR(typeof(List.Handler).Assembly);
 
+            services.AddAutoMapper(typeof(List.Handler).Assembly);
+
             services.AddMvc(opt =>
             {
                 var policy = new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build();
@@ -70,10 +74,23 @@
                 .SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
 
             var builder = services.AddIdentityCore<Domain.AppUser>(); 
+
             var identityBuilder = new IdentityBuilder(builder.UserType, builder.Services);
 
             identityBuilder.AddEntityFrameworkStores<DataContext>();
             identityBuilder.AddSignInManager<SignInManager<Domain.AppUser>>();
+
+            services.AddAuthorization(opt =>
+            {
+                opt.AddPolicy("IsActivityHost", policy =>
+                {
+                    policy.Requirements.Add(new IsHostRequirement());
+                });
+            });
+
+            services.AddTransient<IAuthorizationHandler, IsHostRequirementHandler>();
+
+
             var key = new SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(Configuration["TokenKey"]));
 
 

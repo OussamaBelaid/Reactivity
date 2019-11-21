@@ -1,8 +1,10 @@
 ﻿namespace Application.Activities
 {
+    using Application.Interfaces;
     using Domain;
     using FluentValidation;
     using MediatR;
+    using Microsoft.EntityFrameworkCore;
     using Persistence;
     using System;
     using System.Threading;
@@ -76,14 +78,16 @@
             /// Defines the _context
             /// </summary>
             private readonly DataContext _context;
+            private readonly IUserAccessor _userAccessor;
 
             /// <summary>
             /// Initializes a new instance of the <see cref="Handler"/> class.
             /// </summary>
             /// <param name="context">The context<see cref="DataContext"/></param>
-            public Handler(DataContext context)
+            public Handler(DataContext context , IUserAccessor userAccessor)
             {
                 this._context = context;
+                _userAccessor = userAccessor;
             }
 
             /// <summary>
@@ -105,6 +109,19 @@
                     Venue = request.Venue
                 };
                 _context.Activities.Add(activity);
+
+                var user = await _context.Users.SingleOrDefaultAsync(x => x.UserName == _userAccessor.GetCurrentUsername());
+
+                var attendee = new UserActivity
+                {
+                    AppUser = user,
+                    Activity = activity,
+                    IsHost = true,
+                    DateJoined = DateTime.Now
+                };
+
+                _context.UserActivities.Add(attendee);
+
                 var succes = await _context.SaveChangesAsync() > 0;
                 if (succes) return Unit.Value;
 

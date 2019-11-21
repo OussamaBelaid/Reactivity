@@ -1,12 +1,11 @@
-﻿namespace Domain
-{
-    using System;
-    using System.Collections.Generic;
+﻿using Newtonsoft.Json;
+using System;
+using System.Collections.Generic;
+using System.Text;
 
-    /// <summary>
-    /// Defines the <see cref="Activity" />
-    /// </summary>
-    public class Activity
+namespace Application.DTO
+{
+    public class ActivityDto
     {
         /// <summary>
         /// Gets or sets the Id
@@ -42,6 +41,7 @@
         /// Gets or sets the Venue
         /// </summary>
         public string Venue { get; set; }
-        public virtual ICollection<UserActivity> UserActivities { get; set; }
+        [JsonProperty("attendees")] 
+        public ICollection<AttendeeDto> UserActivities { get; set; }
     }
 }

@@ -30,7 +30,7 @@
                     var context = services.GetRequiredService<DataContext>();
                     var userManager = services.GetRequiredService<UserManager<Domain.AppUser>>();
                     context.Database.Migrate();
-                    Seed.seedData(context,userManager).Wait();
+                    Seed.SeedData(context,userManager).Wait();
                 }
                 catch (Exception ex)
                 {

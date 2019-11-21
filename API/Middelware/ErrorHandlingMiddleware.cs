@@ -42,6 +42,7 @@ namespace API.Middelware
                 case RestException re:
                     logger.LogError(ex, "REST ERROR");
                     errors = re.Errors;
+                     
                     context.Response.StatusCode = (int)re.Code;
 
                     break;
@@ -59,6 +60,7 @@ namespace API.Middelware
                 var result = JsonConvert.SerializeObject(new
                 {
                     errors
+                  
                 });
 
                 await context.Response.WriteAsync(result);

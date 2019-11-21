@@ -26,7 +26,7 @@
         /// Gets or sets the Activities
         /// </summary>
         public DbSet<Activity> Activities { get; set; }
-
+        public DbSet<UserActivity> UserActivities { get; set; }
         /// <summary>
         /// The OnModelCreating
         /// </summary>
@@ -35,6 +35,10 @@
         {
             base.OnModelCreating(modelBuilder);
             modelBuilder.Entity<Value>().HasData(new Value { Id = 1, Name = "Value 101" }, new Value { Id = 2, Name = "Value 102" }, new Value { Id = 3, Name = "Value 103" });
+            modelBuilder.Entity<UserActivity>().HasKey(ua => new { ua.AppUserId, ua.ActivityId });
+            modelBuilder.Entity<UserActivity>().HasOne(u => u.AppUser).WithMany(a => a.UserActivities).HasForeignKey(u => u.AppUserId);
+            modelBuilder.Entity<UserActivity>().HasOne(u => u.Activity).WithMany(a => a.UserActivities).HasForeignKey(u => u.ActivityId);
+
         }
     }
 }
