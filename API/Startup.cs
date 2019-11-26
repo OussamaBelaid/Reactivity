@@ -5,6 +5,7 @@
     using Application.Interfaces;
     using AutoMapper;
     using FluentValidation.AspNetCore;
+    using Infrastructure.Photos;
     using Infrastructure.Security;
     using MediatR;
     using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -108,6 +109,8 @@
             services.AddScoped<IJwtGenerator, JwtGenerator>();
 
             services.AddScoped<IUserAccessor, UserAccessor>();
+            services.AddScoped<IPhotoAccessor, PhotoAccessor>();
+            services.Configure<CloudinarySettings>(Configuration.GetSection("Cloudinary"));
 
            
         }

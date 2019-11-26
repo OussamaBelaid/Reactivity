@@ -27,6 +27,7 @@
         /// </summary>
         public DbSet<Activity> Activities { get; set; }
         public DbSet<UserActivity> UserActivities { get; set; }
+        public DbSet<Photo> Photos { get; set; }
         /// <summary>
         /// The OnModelCreating
         /// </summary>
