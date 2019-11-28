@@ -32,7 +32,8 @@ namespace Application.ProfilesFeatures
                 return new Profile
                 {
                     DisplayName = user.DisplayName,
-                    UserName = user.Photos.FirstOrDefault(x => x.IsMain)?.Url,
+                    UserName = user.UserName,
+                    Image = user.Photos.FirstOrDefault(x=> x.IsMain)?.Url,
                     Photos = user.Photos,
                     Bio = user.Bio
                 };

@@ -43,5 +43,6 @@ namespace Application.DTO
         public string Venue { get; set; }
         [JsonProperty("attendees")] 
         public ICollection<AttendeeDto> UserActivities { get; set; }
+        public ICollection<CommentDto> Comments { get; set; }
     }
 }

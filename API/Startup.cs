@@ -1,6 +1,7 @@
 ﻿namespace API
 {
     using API.Middelware;
+    using API.SignalR;
     using Application.Activities;
     using Application.Interfaces;
     using AutoMapper;
@@ -20,6 +21,7 @@
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.IdentityModel.Tokens;
     using Persistence;
+    using System.Threading.Tasks;
 
     /// <summary>
     /// Defines the <see cref="Startup" />
@@ -57,7 +59,7 @@
             {
                 opt.AddPolicy("corsPolicy", policy =>
                  {
-                     policy.AllowAnyHeader().AllowAnyMethod().WithOrigins("http://localhost:3000");
+                     policy.AllowAnyHeader().AllowAnyMethod().WithOrigins("http://localhost:3000").AllowCredentials();
                  });
             });
 
@@ -65,6 +67,7 @@
             services.AddMediatR(typeof(List.Handler).Assembly);
 
             services.AddAutoMapper(typeof(List.Handler).Assembly);
+            services.AddSignalR();
 
             services.AddMvc(opt =>
             {
@@ -97,12 +100,26 @@
 
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(opt =>
             {
-                opt.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
+                opt.TokenValidationParameters = new TokenValidationParameters
                 {
                     ValidateIssuerSigningKey = true,
                     IssuerSigningKey = key,
                     ValidateAudience = false,
                     ValidateIssuer = false
+                };
+                opt.Events = new JwtBearerEvents
+                {
+                    OnMessageReceived = context =>
+                    {
+                        var accessToken = context.Request.Query["access_token"];
+                        var path = context.HttpContext.Request.Path;
+                        if(!string.IsNullOrEmpty(accessToken) &&
+                         (path.StartsWithSegments("/chat")))
+                        {
+                            context.Token = accessToken;
+                        }
+                        return Task.CompletedTask;
+                    }
                 };
             });
 
@@ -136,6 +153,7 @@
             // app.UseHttpsRedirection();
             app.UseAuthentication();
             app.UseCors("corsPolicy");
+            app.UseSignalR(route => { route.MapHub<ChatHub>("/chat"); });
             app.UseMvc();
         }
     }
