@@ -4,6 +4,7 @@
     using API.SignalR;
     using Application.Activities;
     using Application.Interfaces;
+    using Application.ProfilesFeatures;
     using AutoMapper;
     using FluentValidation.AspNetCore;
     using Infrastructure.Photos;
@@ -127,6 +128,7 @@
 
             services.AddScoped<IUserAccessor, UserAccessor>();
             services.AddScoped<IPhotoAccessor, PhotoAccessor>();
+            services.AddScoped<IProfileReader, ProfileReader>();
             services.Configure<CloudinarySettings>(Configuration.GetSection("Cloudinary"));
 
            

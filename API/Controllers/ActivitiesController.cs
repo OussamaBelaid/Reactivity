@@ -10,6 +10,7 @@
     using System.Collections.Generic;
     using System.Threading;
     using System.Threading.Tasks;
+    using static Application.Activities.List;
 
     /// <summary>
     /// Defines the <see cref="ActivitiesController" />
@@ -25,9 +26,9 @@
         /// <param name="ct">The ct<see cref="CancellationToken"/></param>
         /// <returns>The <see cref="Task{ActionResult{List{Activity}}}"/></returns>
         [HttpGet]
-        public async Task<ActionResult<List<ActivityDto>>> List(CancellationToken ct)
+        public async Task<ActionResult<ActivityEnvelope>> List(int? limit, int? offset,bool isGoing,bool isHost,DateTime? startDate)
         {
-            return await Mediator.Send(new List.Query(), ct);
+            return await Mediator.Send(new List.Query(limit,offset,isGoing,isHost,startDate));
         }
 
         /// <summary>
